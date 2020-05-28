@@ -87,7 +87,8 @@ class TorchTrainJob(Job):
         """
         import torch
 
-        self.model.load_state_dict(state_dict)
+        self.model.load_state_dict(
+            torch.load(self.model_state_dict_path))
         self.optimizer.load_state_dict(
             torch.load(self.optimizer_state_dict_path))
 
