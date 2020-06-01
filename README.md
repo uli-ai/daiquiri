@@ -1,8 +1,10 @@
 daiquiri
 ==============================
 [//]: # (Badges)
-[![Travis Build Status](https://travis-ci.com/REPLACE_WITH_OWNER_ACCOUNT/daiquiri.svg?branch=master)](https://travis-ci.com/REPLACE_WITH_OWNER_ACCOUNT/daiquiri)
-[![codecov](https://codecov.io/gh/REPLACE_WITH_OWNER_ACCOUNT/daiquiri/branch/master/graph/badge.svg)](https://codecov.io/gh/REPLACE_WITH_OWNER_ACCOUNT/daiquiri/branch/master)
+
+![](https://github.com/uli-ai/daiquiri/workflows/CI/badge.svg)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/uli-ai/daiquiri.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/choderalab/pinot/context:python)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/uli-ai/daiquiri.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/choderalab/pinot/alerts/)
 
 Distributed Artificial Intelligence and Quantitative Research
 
