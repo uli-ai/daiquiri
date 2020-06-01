@@ -8,7 +8,7 @@ import time
 def fileUpload(fileName, sock):
 	if os.path.isfile(fileName):
 		sock.send("size" + str(os.path.getsize(fileName)))
-		with open(fileName, rb) as f:
+		with open(fileName, 'rb') as f:
 			dataToSend = f.read(1024)
 			sock.send(dataToSend)
 			while dataToSend != '':
@@ -39,17 +39,17 @@ def Main():
 	host = '127.0.0.1'
 	port = 5000
 	s = socket.socket()
-	s.connect(host, port)
-
+	s.connect((host, port))
 	if raw_input('upload/download/quit?') == 'upload':
 		fileName = raw_input('name of file')
 		s.send("upload" + fileName)
-		fileUpload(filename, s)
+		fileUpload(fileName, s)
+
 	elif raw_input('upload/download/quit?') == 'download':
 		s.send("download")
 		fileRecv(s)
 	elif raw_input('upload/download/quit?') == 'quit':
-		break
+		exit()
 
 	s.close()
 		
