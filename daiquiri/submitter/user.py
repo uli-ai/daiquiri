@@ -19,16 +19,18 @@ def fileUpload(fileName, sock):
 
 	sock.close()
 
-def fileRecv(sock):
-	data = sock.recv(1024)
-	fielSize = int(data[4:])
+def fileDownload(sock):
+
+	fileSize = int(sock.recv(1024)[4:])
 	fileName = sock.recv(1024)
+
+
 	with open(fileName, 'wb') as f:
 		data = sock.recv(1024)
 		totalRecv = len(data)
 		f.write(data)
 		while totalRecv < fileSize:
-			data = s.recv(1024)
+			data = sock.recv(1024)
 			totalRecv += len(data)
 			f.write(data)
 
@@ -40,15 +42,16 @@ def Main():
 	port = 5000
 	s = socket.socket()
 	s.connect((host, port))
-	if raw_input('upload/download/quit?') == 'upload':
+	userRequest = raw_input('upload/download/quit?')
+	if userRequest == 'upload':
 		fileName = raw_input('name of file')
 		s.send("upload" + fileName)
 		fileUpload(fileName, s)
 
-	elif raw_input('upload/download/quit?') == 'download':
+	elif userRequest == 'download':
 		s.send("download")
-		fileRecv(s)
-	elif raw_input('upload/download/quit?') == 'quit':
+		fileDownload(s)
+	elif userRequest == 'quit':
 		exit()
 
 	s.close()
