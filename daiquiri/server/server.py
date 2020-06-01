@@ -11,24 +11,37 @@ def fileRecv(sock, addr, name):
 	# 	os.makedirs("/" + str(addr) + "/data")
 	# 	os.makedirs("/" + str(addr) + "/result")
 	# os.chdir("/" + str(addr) + "/data")
-	fileSize = sock.recv(1024)[4:]
+	fileSize = int(sock.recv(1024)[4:])
 	with open(name, 'wb') as f:
 		data = sock.recv(1024)
 		totalRecv = len(data)
 		f.write(data)
 		while totalRecv < fileSize:
-			data = sock.recv(1024)
-			
+			data = sock.recv(1024)			
 			totalRecv += len(data)
 			f.write(data)
 	
 
 def fileRetriv(sock, addr):
-	if not os.path.isdir("/home/" + addr):
-		raise Exception("Result Not Exist")
+	
+
+	# if not os.path.isdir("/home/" + addr):
+	# 	raise Exception("Result not exist")
+	# os.chdir("/" + str(addr) + "/result")
+
+	# for testing locally only
+	fileName = 'dummy.txt'
+
 	sock.send("size" + str(os.path.getsize(fileName)))
-	sock.send(os.listdir)
-	with open(fileName, rb) as f:
+	
+	sock.send(fileName)
+
+	# what if the dir contains multiple files?
+	# for f in os.listdir('.'):
+	# 	sock.send(f)
+	#   fileName = f
+
+	with open(fileName, "rb") as f:
 		dataToSend = f.read(1024)
 		sock.send(dataToSend)
 		while dataToSend != '':
@@ -47,8 +60,9 @@ def Main():
 	while True:
 		c, addr = s.accept()
 		print('connected to ip {}'.format(addr))
+
+		# from submitter
 		data = c.recv(1024)
-		# listen to user's request
 		if data[:2] == "up":
 			fname = data[6:]
 			fileRecv(c, addr, fname)
