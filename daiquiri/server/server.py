@@ -7,19 +7,21 @@ import os
 import socket
 
 def fileRecv(sock, addr, name):
-	if not os.path.exist("/home/" + addr):
-		os.makedirs("/home/" + addr + "data")
-		os.makedirs("/home/" + addr + "result")
-
+	# if not os.path.exists("/" + str(addr)):
+	# 	os.makedirs("/" + str(addr) + "/data")
+	# 	os.makedirs("/" + str(addr) + "/result")
+	# os.chdir("/" + str(addr) + "/data")
 	fileSize = sock.recv(1024)[4:]
-	with open(name, wb) as f:
-		data = s.recv(1024)
+	with open(name, 'wb') as f:
+		data = sock.recv(1024)
 		totalRecv = len(data)
 		f.write(data)
-		while totalRecv < filesize:
-			data = s.recv(1024)
+		while totalRecv < fileSize:
+			data = sock.recv(1024)
+			
 			totalRecv += len(data)
 			f.write(data)
+	
 
 def fileRetriv(sock, addr):
 	if not os.path.isdir("/home/" + addr):
@@ -40,17 +42,19 @@ def Main():
 	s = socket.socket()
 	s.bind((host,port))
 	s.listen(5)
+	print("server started")
 
 	while True:
-		c, addr = s.accept
+		c, addr = s.accept()
 		print('connected to ip {}'.format(addr))
-	    data = s.recv(1024)
-	    if data[:2] == "up":
-	    	fname = data[6:]
-			fileRecv(s, addr, fname)
+		data = c.recv(1024)
+		# listen to user's request
+		if data[:2] == "up":
+			fname = data[6:]
+			fileRecv(c, addr, fname)
 		elif data[:2] == "do":
-			fileRetriv(s, addr)
+			fileRetriv(c, addr)
 
-if __name__ == '__main':
+if __name__ == '__main__':
 	Main()
 		
