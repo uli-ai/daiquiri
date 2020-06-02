@@ -51,9 +51,10 @@ def fileRetriv(sock, addr):
 	sock.close()
 
 def Main():
-	host = ''
-	port = 5555
+	host = '172.31.37.134'
+	port = 12345
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	s.setblocking(0)
 	try:
 		s.bind((host,port))
 	except socket.error as e:

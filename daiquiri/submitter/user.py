@@ -38,10 +38,10 @@ def fileDownload(sock):
 
 def Main():
 	
-	host = '18.163.180.86'
-	port = 5555
+	host = '172.31.37.134'
+	port = 12345
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.settimeout(20)
+	#s.settimeout(20)
 	s.connect((host, port))
 	userRequest = raw_input('upload/download/quit?')
 	if userRequest == 'upload':
