@@ -37,6 +37,7 @@ def fileRetriv(sock, addr):
 	sock.send(fileName)
 
 	# what if the dir contains multiple files?
+	
 	# for f in os.listdir('.'):
 	# 	sock.send(f)
 	#   fileName = f
@@ -50,7 +51,7 @@ def fileRetriv(sock, addr):
 	sock.close()
 
 def Main():
-	host = '127.0.0.1'
+	host = '18.163.180.86'
 	port = 5000
 	s = socket.socket()
 	s.bind((host,port))
