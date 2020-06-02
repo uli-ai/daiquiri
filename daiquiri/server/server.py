@@ -51,7 +51,7 @@ def fileRetriv(sock, addr):
 	sock.close()
 
 def Main():
-	host = '18.163.180.86'
+	host = '172.31.37.143'
 	port = 5000
 	s = socket.socket()
 	s.bind((host,port))
