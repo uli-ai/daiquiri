@@ -51,11 +51,15 @@ def fileRetriv(sock, addr):
 	sock.close()
 
 def Main():
-	host = '172.31.37.143'
-	port = 5000
-	s = socket.socket()
-	s.bind((host,port))
-	s.listen(5)
+	host = ''
+	port = 5555
+	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+	try:
+		s.bind((host,port))
+	except socket.error as e:
+		print(str(e))
+
+	s.listen(2)
 	print("server started")
 
 	while True:
