@@ -51,7 +51,7 @@ def fileRetriv(sock, addr):
 	sock.close()
 
 def Main():
-	host = '172.31.37.134'
+	host = ''
 	port = 12345
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.setblocking(0)
