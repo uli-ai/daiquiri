@@ -43,12 +43,8 @@ def Main():
 	port = 12345
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	s.settimeout(50)
-	try:
-		s.connect((host1,port))
-		print("connected to host 1 addr")
-	except:
-		s.connect((host2,port))
-		print("connected to host 2 addr")
+	s.connect((host1,port))
+	
 	userRequest = input('upload/download/quit?')
 	if userRequest == 'upload':
 		fileName = raw_input('name of file')
