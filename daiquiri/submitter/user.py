@@ -42,7 +42,7 @@ def Main():
 	host2 = '172.31.37.134'
 	port = 12345
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	#s.settimeout(50)
+	s.settimeout(50)
 	try:
 		s.connect((host1,port))
 		print("connected to host 1 addr")

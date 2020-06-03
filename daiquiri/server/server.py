@@ -54,7 +54,7 @@ def Main():
 	host = ''
 	port = 12345
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.setblocking(0)
+	#s.setblocking(0)
 	try:
 		s.bind((host,port))
 	except socket.error as e:
