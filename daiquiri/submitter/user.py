@@ -7,7 +7,7 @@ import time
 
 def fileUpload(fileName, sock):
 	if os.path.isfile(fileName):
-		sock.send("size" + str(os.path.getsize(fileName)))
+		sock.send(str("size" + str(os.path.getsize(fileName))).encode())
 		with open(fileName, 'rb') as f:
 			dataToSend = f.read(1024)
 			sock.send(dataToSend)
@@ -21,8 +21,8 @@ def fileUpload(fileName, sock):
 
 def fileDownload(sock):
 
-	fileSize = int(sock.recv(1024)[4:])
-	fileName = sock.recv(1024)
+	fileSize = int(sock.recv(1024)[4:].decode())
+	fileName = sock.recv(1024).decode()
 
 
 	with open(fileName, 'wb') as f:
@@ -38,7 +38,7 @@ def fileDownload(sock):
 
 def Main():
 	
-	host = '3.17.80.41'
+	host = '18.166.56.143'
 	port = 12345
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 	#s.settimeout(50)

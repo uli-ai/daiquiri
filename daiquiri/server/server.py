@@ -11,7 +11,7 @@ def fileRecv(sock, addr, name):
 	# 	os.makedirs("/" + str(addr) + "/data")
 	# 	os.makedirs("/" + str(addr) + "/result")
 	# os.chdir("/" + str(addr) + "/data")
-	fileSize = int(sock.recv(1024)[4:])
+	fileSize = int(sock.recv(1024)[4:].decode())
 	with open(name, 'wb') as f:
 		data = sock.recv(1024)
 		totalRecv = len(data)
@@ -31,10 +31,9 @@ def fileRetriv(sock, addr):
 
 	# for testing locally only
 	fileName = 'dummy.txt'
-
-	sock.send("size" + str(os.path.getsize(fileName)))
+	sock.send(("size" + str(os.path.getsize(fileName))).encode())
 	
-	sock.send(fileName)
+	sock.send(fileName.encode())
 
 	# what if the dir contains multiple files?
 	
@@ -68,7 +67,7 @@ def Main():
 		print('connected to ip {}'.format(addr))
 
 		# from submitter
-		data = c.recv(1024)
+		data = c.recv(1024).decode
 		if data[:2] == "up":
 			fname = data[6:]
 			fileRecv(c, addr, fname)
