@@ -11,6 +11,7 @@ def fileRecv(sock, addr, name):
 	# 	os.makedirs("/" + str(addr) + "/data")
 	# 	os.makedirs("/" + str(addr) + "/result")
 	# os.chdir("/" + str(addr) + "/data")
+	print(sock.recv(1024),'----------------------------')
 	fileSize = int(sock.recv(1024)[4:].decode())
 	with open(name, 'wb') as f:
 		data = sock.recv(1024)
