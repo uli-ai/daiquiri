@@ -47,11 +47,11 @@ def Main():
 	userRequest = input('upload/download/quit?')
 	if userRequest == 'upload':
 		fileName = input('name of file')
-		s.send("upload" + fileName)
+		s.send(str("upload" + fileName).encode())
 		fileUpload(fileName, s)
 
 	elif userRequest == 'download':
-		s.send("download")
+		s.send(str("download").encode())
 		fileDownload(s)
 	elif userRequest == 'quit':
 		exit()
