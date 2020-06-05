@@ -67,7 +67,7 @@ def Main():
 		print('connected to ip {}'.format(addr))
 
 		# from submitter
-		data = c.recv(1024).decode
+		data = c.recv(1024).decode()
 		if data[:2] == "up":
 			fname = data[6:]
 			fileRecv(c, addr, fname)
