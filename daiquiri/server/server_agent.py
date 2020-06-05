@@ -8,8 +8,8 @@ import os
 # MODULE CLASSES
 # =============================================================================
 
-class SubmitterAgentBase(abc.ABC):
-    """ Base class for submitter agent.
+class ServerAgentBase(abc.ABC):
+    """ Base class for server agent.
 
     Methods
     -------
@@ -20,33 +20,36 @@ class SubmitterAgentBase(abc.ABC):
         super(UserAgentBase, self).__init__()
 
     @abc.abstractmethod
-    def upload(self, *args, **kwargs):
+    def receive(self, *args, **kwargs):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def download(self, *args, **kwargs):
+    def send(self, *args, **kwargs):
         raise NotImplementedError
 
-class SocketSubmitterAgent(SubmitterAgentBase):
+class SocketServerAgent(ServerAgentBase):
     """ User agent with `socket` package.
 
     """
     def __init__(self, sock):
-        super(SocketSubmitterAgent, self).__init__()
+        super(SocketServerAgent, self).__init__()
 
         # local imports
         import socket
         self.sock = sock
 
-    def upload(self, path, buffer_size=1024):
+    def send(self, path, buffer_size=1024):
         """ Upload file using socket.
 
         """
-        assert os.path.isfile(path), 'Path does not exist.'
 
         # send size
         sock.send('size' + str(
             os.path.getsize(path)))
+
+        # send name
+        sock.send(
+            os.path.basename(path))
 
         with open(path, 'rb') as f_handle:
             # get data
@@ -55,9 +58,17 @@ class SocketSubmitterAgent(SubmitterAgentBase):
             # send data
             self.sock.send(data)
 
+            # TODO:
+            # shall we use len() == 0 or equivalent
+            # since there could be various encodings?
+            # not sure
+            while data != '':
+                data = f_handle.read(buffer_size)
+                self.send(data)
+
         self.sock.close()
 
-    def download(self, path, buffer_size=1024):
+    def receive(self, path, buffer_size=1024):
         """ Download file using socket.
 
         """
