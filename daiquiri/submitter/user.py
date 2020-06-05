@@ -38,16 +38,15 @@ def fileDownload(sock):
 
 def Main():
 	
-	host1 = '18.163.180.86'
-	host2 = '172.31.37.134'
+	host = '3.17.80.41'
 	port = 12345
 	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.settimeout(50)
-	s.connect((host1,port))
+	#s.settimeout(50)
+	s.connect((host,port))
 	
 	userRequest = input('upload/download/quit?')
 	if userRequest == 'upload':
-		fileName = raw_input('name of file')
+		fileName = input('name of file')
 		s.send("upload" + fileName)
 		fileUpload(fileName, s)
 
