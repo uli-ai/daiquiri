@@ -1,80 +1,106 @@
-""" A simple file system from the server side which takes cares 
-of user/submitter's request of submitting training data or 
-downloading a trained model/predicted result
-"""
-
+"""Daiquiri server functions."""
 import os
+import json 
 import socket
+import threading
+from Daiquiri import helper
+from Daiquiri.jobs import job
 
-def fileRecv(sock, addr, name):
-	# if not os.path.exists("/" + str(addr)):
-	# 	os.makedirs("/" + str(addr) + "/data")
-	# 	os.makedirs("/" + str(addr) + "/result")
-	# os.chdir("/" + str(addr) + "/data")
-	print(sock.recv(1024),'----------------------------')
-	fileSize = int(sock.recv(1024)[4:].decode())
-	with open(name, 'wb') as f:
-		data = sock.recv(1024)
-		totalRecv = len(data)
-		f.write(data)
-		while totalRecv < fileSize:
-			data = sock.recv(1024)			
-			totalRecv += len(data)
-			f.write(data)
+class Server:
+	"""Define class Server."""
 	
+	def __init__(port):
+		"""Init."""
 
-def fileRetriv(sock, addr):
-	
+		"""	
+			# donor example
+			registeredDonor[0] = {
+					 			  donorID: 0001,
+					 			  host: 'x.x.x.x',
+					 			  port: xxxxx,
+					 			  #localProcessID: xxxx,
+					 			  status: alive/busy/dead,
+					 			  Task: [],
+					 			  currentJobID: xxxxx00001 	
+								 }
+		"""
+		self.registeredDonor = []
+		self.registeredSubmitter = []
 
-	# if not os.path.isdir("/home/" + addr):
-	# 	raise Exception("Result not exist")
-	# os.chdir("/" + str(addr) + "/result")
-
-	# for testing locally only
-	fileName = 'dummy.txt'
-	sock.send(("size" + str(os.path.getsize(fileName))).encode())
-	
-	sock.send(fileName.encode())
-
-	# what if the dir contains multiple files?
-	
-	# for f in os.listdir('.'):
-	# 	sock.send(f)
-	#   fileName = f
-
-	with open(fileName, "rb") as f:
-		dataToSend = f.read(1024)
-		sock.send(dataToSend)
-		while dataToSend != '':
-			dataToSend = f.read(1024)
-			sock.send(dataToSend)
-	sock.close()
-
-def Main():
-	host = ''
-	port = 12345
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	#s.setblocking(0)
-	try:
-		s.bind((host,port))
-	except socket.error as e:
-		print(str(e))
-
-	s.listen(2)
-	print("server started")
-
-	while True:
-		c, addr = s.accept()
-		print('connected to ip {}'.format(addr))
-
-		# from submitter
-		data = c.recv(1024).decode()
-		if data[:2] == "up":
-			fname = data[6:]
-			fileRecv(c, addr, fname)
-		elif data[:2] == "do":
-			fileRetriv(c, addr)
-
-if __name__ == '__main__':
-	Main()
+		# create a TCP socket
+		self.socketTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.socketTCP.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		self.socketTCP.bind(('',port)) # current EC2 SG open port: 12345
 		
+		# create a new thread for heartbeat message from donors
+		self.socketHeartbeat = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) #UDP?
+
+		
+
+
+
+	def start(self):
+		"""Daiquiri server starts."""
+		thread = threading.Thread(target=self.listenDonorHeartbeat)
+		thread.start()
+
+		while True:
+			request = self.listenSubmitterRequest()
+
+
+	def listenSubmitterRequest(self):
+		"""Receive requests from submitter."""
+		# listen
+
+		# 1.create new task
+		# 2.enquiring current job status
+		# 3.download finished job
+		pass
+
+
+	def listenDonorHeartbeat(self):
+		"""Listen heartbeat message from donor."""
+
+		# listen
+		while True:
+			# recv msg
+			data, _ = self.socketHeartbeat.recvfrom(1024)
+			# decode msg
+			  ???
+			# update
+			handleDonorHeartbeat(data)
+
+
+	def handleDonorHeartbeat(self):
+		"""Handle heartbeat message from donor."""
+		pass
+
+
+	def createNewTask(self):
+		"""Create new task from submitter."""
+		pass
+
+
+	def checkTaskStatus(self):
+		"""Check current task status from donors' report."""
+		pass
+
+
+    def sendResult(self):
+    	"""Send finished task result files back to submitter."""
+		pass
+
+
+    def distributeJobs(self):
+    	"""Distribute jobs among donors."""
+		pass
+
+
+	def receiveCheckPoint(self):
+		"""Receive and store intermediate files from donor."""
+		pass
+
+		
+
+
+

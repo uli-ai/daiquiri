@@ -6,6 +6,9 @@ Distributed Artificial Intelligence and Quantitative Research
 # Add imports here
 import daiquiri
 import daiquiri.jobs
+import daiquiri.donor
+import daiquiri.server
+import daiquiri.submitter
 
 # Handle versioneer
 from ._version import get_versions
