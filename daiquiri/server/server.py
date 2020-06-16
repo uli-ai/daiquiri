@@ -1,6 +1,7 @@
 """Daiquiri server functions."""
 import os
-import json 
+import json
+import click 
 import socket
 import threading
 from Daiquiri import helper
@@ -15,74 +16,225 @@ class Server:
 		"""	
 			# donor example
 			registeredDonor[0] = {
-					 			  donorID: 0001,
+					 			  donorID: 1,
 					 			  host: 'x.x.x.x',
 					 			  port: xxxxx,
-					 			  #localProcessID: xxxx,
+					 			  local_process_ID: xxxx,
 					 			  status: alive/busy/dead,
-					 			  Task: [],
-					 			  currentJobID: xxxxx00001 	
+					 			  device:          ,
+					 			  donate_time:        ,
+					 			  task: self.tasks[0],
+					 			  current_job_ID: xxxxx00001,
+					 			  loss: 	
 								 }
 		"""
-		self.registeredDonor = []
-		self.registeredSubmitter = []
+		self.registered_donors = []
+		self.submitters = []
+		self.tasks = []
+		self.jobs = []
+		self.donor_alive = []
 
-		# create a TCP socket
-		self.socketTCP = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		self.socketTCP.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		self.socketTCP.bind(('',port)) # current EC2 SG open port: 12345
+		# create a TCP socket send and receive message from donor
+		self.socket_donors = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.socket_donors.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		self.socket_donors.bind(('', port)) # current EC2 SG open port: 12345
+		self.socket_donors.listen(5)
 		
-		# create a new thread for heartbeat message from donors
-		self.socketHeartbeat = socket.socket(socket.AF_INET, socket.SOCK_DGRAM) #UDP?
+		# create a socket for heartbeat message from donors, UDP
+		self.socket_heartbeats = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+		self.socket_heartbeats.bind('', port-1)
 
-		
+		# create a TCP socket for submitters' request
+		self.socket_submitters = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		self.socket_submitters.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		self.socket_submitters.bind(('', port-2))
+		self.socket_submitters.listen(5)		
 
 
 
 	def start(self):
 		"""Daiquiri server starts."""
-		thread = threading.Thread(target=self.listenDonorHeartbeat)
-		thread.start()
+		# start a new thread to listen donors' heartbeats
+		_thread = threading.Thread(target=self.listenDonorHeartbeats)
+		_thread.start()
+
+		# start a new thread to listen submitters' request
+		# TODO
+		_thread = threading.Thread(target=self.listenSubmitterRequests)
+		_thread.start()
+
+		# start a new thread to listen message from donor
+		_thread = threading.Thread(target=self.listenDonorMessage)
+		_thread.start()
 
 		while True:
-			request = self.listenSubmitterRequest()
+			request = self.donorAllocation()
 
 
-	def listenSubmitterRequest(self):
+	def listenDonorMessage(self):
+		"""Listen message from donor."""
+
+		# executing all the life time
+		while True:
+			conn, _ = self.socket_donors.accept()
+			message = ''
+			while True:
+				data = conn.recv(1024)
+				message += data.decode('utf-8')
+				if len(data) < 1024:
+					break
+			conn.close()
+			message = json.loads(message)
+
+			# handle donor message
+			if message['type'] == 'registration':
+				registerDonor(message)
+			elif message['type'] == 'shutdown':
+				handleDonorShutdown(message)
+
+
+	def registerDonor(self, message):
+		"""Register donor on server."""
+		"""
+			message example:
+			message['type'] can be 
+					'registration'/'shutdown'/'assign job'/'registration done'
+			message = {
+						"type": '',
+						"host": x.x.x.x,
+						"port": xxxx,
+						"PID": xx,
+						"device": ,
+						"time": 
+					  }
+		"""
+		donor = {
+			'donorID' = len(self.registered_Donor),
+			'host' = message['host'],
+			'port' = message['port'],
+			'localProcessID' = message['PID'],
+			'status' = 'alive',
+			'device' = message['device'],
+			'donate_time' = message['time'],
+			'task' = None,
+			'current_job_ID' = None,
+			'loss' = 0		
+		}
+		self.registered_donor.append(donor)
+
+		# send an acknowledge message back to the donor
+		response_message = {
+			'type' = 'registration done',
+			'host' = message['host'],
+			'port' = message['port'],
+			'PID' = message['PID'],
+			'device' = message['device'],
+			'time' = message['time']
+		}
+
+		# donors open a TCP socket connection to listen message from the server
+		response_message = json.dumps(response_message)
+		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		s.connect((message['host'], message['port']))
+		s.sendall(response_message)
+		s.close()
+
+		# distribute jobs to this new donor machine
+		# TODO:
+		#distributeJobs()
+
+
+	def listenSubmitterRequests(self):
 		"""Receive requests from submitter."""
 		# listen
+		c, addr = self.socket_submitters.accept()
+		#print('connected to ip {}'.format(addr))
 
 		# 1.create new task
-		# 2.enquiring current job status
+		# 2.check current job status
 		# 3.download finished job
-		pass
+		while True:
+			message = c.recv(1024)
+			if message == 'new':
+				if not os.path.exist('~/submiiters/'+str(addr)):
+					os.mkdir('~/submiiters/'+str(addr))
+				os.chdir('~/submiiters/'+str(addr))
+				helper.fileReceive()
+
+				#TODO: somehow create a task message here, no idea
+				_task = {}
+				self.tasks.append(_task)
+				
+			
+			if message == 'check':
+				response_message = checkTaskStatus()
+				c.sendall(response_message)
+
+			if message == 'download':
+				for f in os.listdir('~/submitter/'+ str(addr) + 'result')
+					helper.fileSend(f)
 
 
-	def listenDonorHeartbeat(self):
-		"""Listen heartbeat message from donor."""
+	def listenDonorHeartbeats(self):
+		"""Listen heartbeats message from donor."""
 
 		# listen
 		while True:
 			# recv msg
 			data, _ = self.socketHeartbeat.recvfrom(1024)
 			# decode msg
-			  ???
+			message = json.loads(data.decode('utf-8'))
 			# update
-			handleDonorHeartbeat(data)
+			if self.registered_donors[message['worker_host']]['status'] != alive:
+				return
+			# reset loss
+			self.registered_donors[message[worker_host]]['loss'] = 0
 
 
-	def handleDonorHeartbeat(self):
-		"""Handle heartbeat message from donor."""
-		pass
+	def donorAllocation(self):
+		"""Check donors status and distribute any jobs among alive 
+		donors when necessary. This function is called whenever a new
+		donor registered or a working donor shutdown (connection timeout
+		or donor sent a shutdown command).
+		"""
+		while True:
+			
+			jobs_not_assigned = []
+
+			for don in self.registered_donors:
+				if don['status'] == 'dead':
+					continue
+				
+				don['loss'] += 1
+				if don['loss'] <= 10: 
+					self.donors_alive.append(don)
+					continue
+
+				# consider the rest donors as 'dead'
+				don['status'] = 'dead'
+
+				# TODO: set the 'dead' donors' jobs to be not assigned
+				#       and trigger redistribution
+
+				don['task'] = None
+				don['current_job_ID'] = None 
+
+			time.sleep(5) # how long should it sleep?
+
+	def handleDonorShutdown(self, message):
+		"""Handle the 'shutdown' message sent from donor."""
 
 
 	def createNewTask(self):
 		"""Create new task from submitter."""
+
+		# TODO:
 		pass
 
 
 	def checkTaskStatus(self):
 		"""Check current task status from donors' report."""
+		# TODO:
 		pass
 
 
@@ -100,7 +252,19 @@ class Server:
 		"""Receive and store intermediate files from donor."""
 		pass
 
-		
+
+	def estimateJobTime(self):
+		"""Estimate time needed for a donor to finish a job."""
+		pass
 
 
+@click.command()
+@click.argument("port_num", nargs=1, type=int)
+def main(port_num):
+    """Starting Daiquiri master server"""
+    master = Master(port_num)
+    master.start()		
 
+
+if __name__ = '__main__':
+	main()

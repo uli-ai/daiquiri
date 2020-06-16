@@ -1,5 +1,6 @@
 """Daiquiri helper functions."""
 import os
+import tqdm
 import socket
 
 
@@ -40,3 +41,5 @@ def fileEncrypt(fileName):
 	"""Encrypt sending files."""
 	pass
 	
+
+# considering adding file compress or decompress
