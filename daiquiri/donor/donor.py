@@ -36,8 +36,15 @@ class Donor:
 		self.device = self.getDeviceInfo()
 
 
+
 	def start(self):
 		"""Start donor program."""
+
+		# send registration message before everything starts
+		self.sendRegistrationMessage()
+
+		# start a new thread sending heartbeats message if registration
+		# done message received 
 		_thread = threading.Thread(target = sendHeartbeatsMessage)
 		_thread.start()
 
@@ -55,7 +62,7 @@ class Donor:
 						break
 				conn.close()
 				message = json.loads(message)
-				handleMessage(message)
+				handleMessage(message, message)
 
 	def getDeviceInfo():
 		"""Get device hardware information on this device."""
@@ -105,13 +112,21 @@ class Donor:
 
 		while True:
 			self.socket_heartbeats.sendto(message,(self.server_port,self.server_host))
-			time.sleep(5) 
+			time.sleep(5) # time gap
 
 
 
 
-	def handleMessage(self):
+	def handleMessage(self, message):
 		"""Handle message received from the server."""
+		if message['type'] == 'registration_received':
+			# TODO
+			pass
+		if message['type'] == 'assign_job':
+			# TODO
+			pass
+
+
 
 
 
@@ -131,6 +146,10 @@ class Donor:
 		"""Handle job assignment and run the program."""
 
 
+	def runJob(self):
+		"""Run assigned job program."""
+
+
 
 @click.command()
 @click.argument("donate_time", nargs=1, type=float)
@@ -141,7 +160,7 @@ def main(port, donate_time):
     donor.start()		
 
 
-if __name__ = '__main__':
+if __name__ == '__main__':
 	main()
 
 

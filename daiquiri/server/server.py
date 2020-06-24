@@ -61,7 +61,7 @@ class Server:
 		# start a new thread to listen submitters' request
 		# TODO
 		_thread = threading.Thread(target=self.listenSubmitterRequests)
-		_thread.start()
+		_thread.start(target=self.)
 
 		# start a new thread to listen message from donor
 		_thread = threading.Thread(target=self.listenDonorMessage)
@@ -98,7 +98,7 @@ class Server:
 		"""
 			message example:
 			message['type'] can be 
-					'registration'/'shutdown'/'assign job'/'registration done'
+					'registration'/'shutdown'/'assign_job'/'registration_received'
 			message = {
 						"type": '',
 						"host": x.x.x.x,
@@ -109,27 +109,27 @@ class Server:
 					  }
 		"""
 		donor = {
-			'donorID' = len(self.registered_Donor),
-			'host' = message['host'],
-			'port' = message['port'],
-			'localProcessID' = message['PID'],
-			'status' = 'alive',
-			'device' = message['device'],
-			'donate_time' = message['time'],
-			'task' = None,
-			'current_job_ID' = None,
-			'loss' = 0		
+			'donorID': len(self.registered_Donor),
+			'host': message['host'],
+			'port': message['port'],
+			'localPro:cessID': message['PID'],
+			'status': 'alive',
+			'device': message['device'],
+			'donate_time': message['time'],
+			'task': None,
+			'current_job_ID': None,
+			'loss': 0		
 		}
-		self.registered_donor.append(donor)
+		self.registered_donors.append(donor)
 
 		# send an acknowledge message back to the donor
 		response_message = {
-			'type' = 'registration done',
-			'host' = message['host'],
-			'port' = message['port'],
-			'PID' = message['PID'],
-			'device' = message['device'],
-			'time' = message['time']
+			'type': 'registration_received',
+			'host': message['host'],
+			'port': message['port'],
+			'PID': message['PID'],
+			'device': message['device'],
+			'time': message['time']
 		}
 
 		# donors open a TCP socket connection to listen message from the server
@@ -171,7 +171,7 @@ class Server:
 				c.sendall(response_message)
 
 			if message == 'download':
-				for f in os.listdir('~/submitter/'+ str(addr) + 'result')
+				for f in os.listdir('~/submitter/'+ str(addr) + 'result'):
 					helper.fileSend(f)
 
 
@@ -238,13 +238,13 @@ class Server:
 		pass
 
 
-    def sendResult(self):
-    	"""Send finished task result files back to submitter."""
+	def sendResult(self):
+		"""Send finished task result files back to submitter."""
 		pass
 
 
-    def distributeJobs(self):
-    	"""Distribute jobs among donors."""
+	def distributeJobs(self):
+		"""Distribute jobs among donors."""
 		pass
 
 
@@ -266,5 +266,5 @@ def main(port_num):
     master.start()		
 
 
-if __name__ = '__main__':
+if __name__ == '__main__':
 	main()
