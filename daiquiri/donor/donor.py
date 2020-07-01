@@ -14,7 +14,7 @@ from Daquiri import helper
 class Donor:
 	"""Define class Donor."""
 
-	def __init__(port, time):
+	def __init__(self, port, time):
 		"""Init."""
 
 		self.host = socket.gethostbyname(socket.gethostname())
@@ -28,7 +28,7 @@ class Donor:
 		self.socket_listen_server = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 		self.socket_listen_server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 		self.socket_listen_server.bind(('',self.port))
-		self.listen(5)
+		self.socket_listen_server.listen(5)
 
 		self.job = None
 		self.task = None
@@ -62,9 +62,9 @@ class Donor:
 						break
 				conn.close()
 				message = json.loads(message)
-				handleMessage(message, message)
+				handleMessage(message)
 
-	def getDeviceInfo():
+	def getDeviceInfo(self):
 		"""Get device hardware information on this device."""
 
 		device_info = {}
@@ -78,6 +78,7 @@ class Donor:
 			device_info['disk_usage'] = psutil.disk_usage(os.getcwd())
 			# for gpu machine only
 			#device_info['gpu'] = gputil.getGPUS()
+			device_info['error'] = 'None'
 		except PermissionError:
 			device_info['error'] = 'Permission Denied'
 
@@ -86,13 +87,14 @@ class Donor:
 
 	def sendRegistrationMessage(self):
 		"""Send regitration message to the server.""" 
-		message = {}
-		message['type'] = 'registration'
-		message['host'] = self.host
-		message['port'] = self.port
-		message['PID'] = self.pid
-		message['device'] = self.device
-		message['time'] = self.donate_time
+		message = {
+			'type': 'registration',
+			'host': self.host,
+			'port': self.port,
+			'PID': self.pid,
+			'device': self.device,
+			'time': self.donate_time
+		}
 		message = json.dumps(message)
 		s  = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		s.connect((self.server_host, self.server_port))
@@ -101,17 +103,18 @@ class Donor:
 
 	def sendHeartbeatsMessage(self):
 		"""Send heartbeats message to the server."""
-		heartbeat_message = {}
-		heartbeat_message['type'] = 'heart beats'
-		heartbeat_message['host'] = self.host
-		heartbeat_message['port'] = self.port
-		heartbeat_message['task'] = self.task
-		heartbeat_message['job'] = self.job
-		heartbeat_message['PID'] = self.pid
-		heartbeat_message = json.dumps(heartbeat_message)
+		heartbeat_message = {
+			'type': 'heart_beats',
+			'host': self.host,
+			'port': self.port,
+			'task': self.task,
+			'job': self.job,
+			'PID': self.pid
+		}
+		heartbeat_message = json.dumps(heartbeat_message).encode('utf-8')
 
 		while True:
-			self.socket_heartbeats.sendto(message,(self.server_port,self.server_host))
+			self.socket_heartbeats.sendto(heartbeat_message,(self.server_host,self.server_port))
 			time.sleep(5) # time gap
 
 

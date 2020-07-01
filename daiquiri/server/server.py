@@ -10,7 +10,7 @@ from Daiquiri.jobs import job
 class Server:
 	"""Define class Server."""
 	
-	def __init__(port):
+	def __init__(self, port):
 		"""Init."""
 
 		"""	
@@ -42,7 +42,7 @@ class Server:
 		
 		# create a socket for heartbeat message from donors, UDP
 		self.socket_heartbeats = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-		self.socket_heartbeats.bind('', port-1)
+		self.socket_heartbeats.bind(('', port-1))
 
 		# create a TCP socket for submitters' request
 		self.socket_submitters = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -109,7 +109,7 @@ class Server:
 					  }
 		"""
 		donor = {
-			'donorID': len(self.registered_Donor),
+			'donorID': len(self.registered_donors),
 			'host': message['host'],
 			'port': message['port'],
 			'localPro:cessID': message['PID'],
@@ -136,7 +136,7 @@ class Server:
 		response_message = json.dumps(response_message)
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		s.connect((message['host'], message['port']))
-		s.sendall(response_message)
+		s.sendall(response_message.encode('utf-8'))
 		s.close()
 
 		# distribute jobs to this new donor machine
@@ -180,15 +180,23 @@ class Server:
 
 		# listen
 		while True:
+			
 			# recv msg
-			data, _ = self.socketHeartbeat.recvfrom(1024)
+			data, _ = self.socket_heartbeats.recvfrom(1024)
 			# decode msg
 			message = json.loads(data.decode('utf-8'))
-			# update
-			if self.registered_donors[message['worker_host']]['status'] != alive:
-				return
-			# reset loss
-			self.registered_donors[message[worker_host]]['loss'] = 0
+
+			# check the status of this donor
+			# if dead -> ignore it
+			for donor in self.registered_donors:
+				if donor['host'] == message['host']:
+					if donor['status'] != 'alive':
+						return 
+
+			# reset loss if alive
+			for donor in self.registered_donors:
+				if donor['host'] == message['host']:
+					donor['loss'] = 0
 
 
 	def donorAllocation(self):
@@ -262,8 +270,8 @@ class Server:
 @click.argument("port_num", nargs=1, type=int)
 def main(port_num):
     """Starting Daiquiri master server"""
-    master = Master(port_num)
-    master.start()		
+    server = Server(port_num)
+    server.start()		
 
 
 if __name__ == '__main__':
