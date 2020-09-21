@@ -32,7 +32,7 @@ class Server:
 		self.submitters = []
 		self.tasks = []
 		self.jobs = []
-		self.donor_alive = []
+
 
 		# create a TCP socket send and receive message from donor
 		self.socket_donors = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -61,14 +61,14 @@ class Server:
 		# start a new thread to listen submitters' request
 		# TODO
 		_thread = threading.Thread(target=self.listenSubmitterRequests)
-		_thread.start(target=self.)
+		_thread.start()
 
 		# start a new thread to listen message from donor
 		_thread = threading.Thread(target=self.listenDonorMessage)
 		_thread.start()
 
 		while True:
-			request = self.donorAllocation()
+			self.donorAllocation()
 
 
 	def listenDonorMessage(self):
@@ -88,9 +88,9 @@ class Server:
 
 			# handle donor message
 			if message['type'] == 'registration':
-				registerDonor(message)
+				self.registerDonor(message)
 			elif message['type'] == 'shutdown':
-				handleDonorShutdown(message)
+				self.handleDonorShutdown(message)
 
 
 	def registerDonor(self, message):
@@ -112,7 +112,7 @@ class Server:
 			'donorID': len(self.registered_donors),
 			'host': message['host'],
 			'port': message['port'],
-			'localPro:cessID': message['PID'],
+			'localProcessID': message['PID'],
 			'status': 'alive',
 			'device': message['device'],
 			'donate_time': message['time'],
@@ -180,7 +180,7 @@ class Server:
 
 		# listen
 		while True:
-			
+
 			# recv msg
 			data, _ = self.socket_heartbeats.recvfrom(1024)
 			# decode msg
@@ -201,21 +201,22 @@ class Server:
 
 	def donorAllocation(self):
 		"""Check donors status and distribute any jobs among alive 
-		donors when necessary. This function is called whenever a new
+		donors when necessary. This function works whenever a new
 		donor registered or a working donor shutdown (connection timeout
 		or donor sent a shutdown command).
 		"""
 		while True:
 			
 			jobs_not_assigned = []
-
+			avaliable_donors = []
+			
 			for don in self.registered_donors:
 				if don['status'] == 'dead':
 					continue
 				
 				don['loss'] += 1
-				if don['loss'] <= 10: 
-					self.donors_alive.append(don)
+				if don['loss'] <= 5: 
+					avaliable_donors.append(don)
 					continue
 
 				# consider the rest donors as 'dead'

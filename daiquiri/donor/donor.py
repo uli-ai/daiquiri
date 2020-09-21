@@ -45,7 +45,7 @@ class Donor:
 
 		# start a new thread sending heartbeats message if registration
 		# done message received 
-		_thread = threading.Thread(target = sendHeartbeatsMessage)
+		_thread = threading.Thread(target = self.sendHeartbeatsMessage)
 		_thread.start()
 
 		while True:
@@ -62,7 +62,7 @@ class Donor:
 						break
 				conn.close()
 				message = json.loads(message)
-				handleMessage(message)
+				self.handleMessage(message)
 
 	def getDeviceInfo(self):
 		"""Get device hardware information on this device."""
@@ -97,7 +97,7 @@ class Donor:
 		}
 		message = json.dumps(message)
 		s  = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		s.connect((self.server_host, self.server_port))
+		s.connect((self.server_host, self.server_port-1))
 		s.sendall(message.encode('utf-8'))
 		s.close()
 
